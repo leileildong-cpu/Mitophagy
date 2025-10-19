@@ -1,0 +1,88 @@
+# NLRP3抑制剂虚拟筛选配置文件
+project_name: "NLRP3_Inflammasome_Inhibitor_Screening"
+target_protein: "NLRP3"
+
+# 数据文件路径
+data:
+  references_csv: "data/nlrp3_known_inhibitors.csv"  # 已知NLRP3抑制剂
+  library_csv: "data/screening_library.csv"          # 筛选库
+
+# 过滤器配置
+filters:
+  # 基础过滤
+  pains: true
+  brenk: true
+  cns_filter: false  # 禁用标准CNS规则，使用NLRP3特异性规则
+
+  # NLRP3特异性过滤器
+  nlrp3_filter: true
+  nlrp3_rules:
+    mw_min: 200
+    mw_max: 600
+    logp_min: 1.5
+    logp_max: 5.0
+    hbd_max: 3
+    hba_max: 8
+    tpsa_min: 40
+    tpsa_max: 140
+    rotb_max: 10
+    aromatic_rings_min: 2
+    aromatic_rings_max: 4
+
+  # ADMET过滤
+  admet_filter: true
+  admet_rules:
+    lipinski: true
+    veber: true
+    ghose: true
+    caco2_permeability: -5.5  # Log Papp阈值
+
+  # 毒性过滤
+  toxicity_filter: true
+  toxicity_rules:
+    mutagenicity: true
+    hepatotoxicity: true
+    cardiotoxicity: true
+
+# 相似性计算权重
+similarity:
+  w_1d: 0.35      # Morgan指纹（结构相似性）
+  w_2d: 0.40      # 药效团（药理特征）
+  w_3d: 0.25      # 3D形状（结合模式）
+
+# AI增强模型
+ai_model:
+  use_clustering: true
+  n_clusters: 8
+  use_outlier_filter: true
+  similarity_threshold: 0.30  # NLRP3特异性阈值（较低）
+
+# 分子对接（可选）
+docking:
+  enabled: false  # 默认禁用，需要时手动启用
+  protein_pdb: "data/nlrp3_protein.pdb"
+  binding_site:
+    center: [10.5, 15.2, -8.3]  # 需根据实际蛋白结构调整
+    box_size: [20, 20, 20]
+  exhaustiveness: 8
+  num_modes: 10
+  max_molecules: 50  # 最多对接前50个分子
+
+# 指纹和描述符
+fingerprints:
+  morgan_radius: 3      # 增加半径
+  morgan_nbits: 2048
+
+# 输出配置
+output:
+  dir: "nlrp3_results"
+  hits_csv: "nlrp3_screening_hits.csv"
+  report_txt: "nlrp3_screening_report.txt"
+  generate_html_report: true
+  top_n_compounds: 100
+
+# 性能配置
+performance:
+  chunk_size: 5000
+  use_streaming: false
+  max_results: 10000

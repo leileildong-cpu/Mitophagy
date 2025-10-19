@@ -1,0 +1,149 @@
+{
+  "processing_time_seconds": 2173.6470036506653,
+  "performance_stats": {
+    "preprocessing_time": 18.54800271987915,
+    "feature_extraction_time": 1016.8764998912811,
+    "similarity_computation_time": 1040.3239979743958,
+    "filtering_time": 96.02499961853027,
+    "cache_hits": 12,
+    "cache_misses": 11313
+  },
+  "cpu_threads": 32,
+  "gpu_enabled": true,
+  "gpu_backend": "PyTorch",
+  "system_info": {
+    "cpu_count": 48,
+    "memory_total_gb": 190.64570999145508,
+    "memory_available_gb": 55.7730598449707
+  },
+  "data_stats": {
+    "total_compounds": 11301,
+    "reference_compounds": 12,
+    "library_compounds": 11301,
+    "hits_count": 6,
+    "hit_rate": 0.0005309264666843643
+  },
+  "config_used": {
+    "data": {
+      "references_csv": "data/nlrp3_references.csv",
+      "library_csv": "data/nlrp3_library_2w/library.csv"
+    },
+    "output": {
+      "dir": "nlpr3_outputs/nlrp3_2w_final_20251018_192630",
+      "hits_csv": "nlrp3_hits.csv",
+      "report_txt": "nlrp3_screening_report.txt"
+    },
+    "fingerprints": {
+      "morgan_radius": 3,
+      "morgan_nbits": 2048
+    },
+    "mol2vec": {
+      "model_path": "models/mol2vec_model.pkl"
+    },
+    "similarity": {
+      "w_1d": 0.4,
+      "w_2d": 0.4,
+      "w_3d": 0.2
+    },
+    "filters": {
+      "pains": true,
+      "cns_filter": false,
+      "nlrp3_specific": true,
+      "nlrp3_rules": {
+        "mw_min": 250,
+        "mw_max": 600,
+        "logp_min": 1.5,
+        "logp_max": 6.0,
+        "tpsa_min": 30,
+        "tpsa_max": 120,
+        "hbd_max": 3,
+        "hba_max": 8,
+        "rotb_max": 10,
+        "aromatic_rings_min": 2,
+        "aromatic_rings_max": 5,
+        "heavy_atoms_min": 15,
+        "heavy_atoms_max": 45
+      },
+      "preferred_features": {
+        "sulfonamide": 2.0,
+        "pyridine": 1.5,
+        "pyrimidine": 1.5,
+        "imidazole": 1.5,
+        "benzamide": 1.2,
+        "halogen": 1.0,
+        "urea": 1.3
+      },
+      "cns_rules": {
+        "mw_min": 130,
+        "mw_max": 725,
+        "logp_min": -7,
+        "logp_max": 5.5,
+        "hbd_max": 7,
+        "hba_max": 12,
+        "tpsa_max": 200,
+        "rotb_max": 11
+      }
+    },
+    "shape3d": {
+      "num_confs": 1,
+      "seed": 42,
+      "max_attempts": 10,
+      "prune_rms_thresh": 0.1,
+      "use_mmff": false
+    },
+    "ai_model": {
+      "similarity_threshold": 0.5,
+      "use_clustering": true,
+      "use_outlier_filter": true,
+      "clustering": {
+        "n_clusters": 8,
+        "method": "kmeans"
+      },
+      "similarity_search": {
+        "enabled": true,
+        "min_similarity": 0.6,
+        "fingerprint_type": "ECFP6"
+      }
+    },
+    "performance": {
+      "chunk_size": 10000,
+      "max_results": 50000,
+      "use_streaming": false
+    },
+    "scoring": {
+      "similarity_weight": 0.5,
+      "structure_weight": 0.3,
+      "druglikeness_weight": 0.2,
+      "bonus_for_known_scaffolds": 0.1,
+      "penalty_for_complexity": 0.05
+    },
+    "target_specific": {
+      "target_name": "NLRP3",
+      "target_type": "Inflammasome component",
+      "binding_site": "NACHT domain ATP-binding pocket",
+      "key_interactions": [
+        "Hydrogen bond with ATP binding site",
+        "Hydrophobic interactions in pocket",
+        "\u03c0-\u03c0 stacking with aromatic residues"
+      ],
+      "avoid_features": [
+        "Reactive electrophiles",
+        "Michael acceptors (unless validated)",
+        "Aldehyde groups",
+        "Peroxide groups"
+      ]
+    },
+    "validation": {
+      "prioritization": {
+        "max_compounds": 100,
+        "diversity_threshold": 0.7
+      },
+      "ranking_criteria": [
+        "combined_score",
+        "reference_similarity",
+        "structural_novelty",
+        "druglikeness"
+      ]
+    }
+  }
+}

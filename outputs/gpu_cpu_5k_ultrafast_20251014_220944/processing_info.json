@@ -1,0 +1,80 @@
+{
+  "processing_time_seconds": 26.440000534057617,
+  "performance_stats": {
+    "preprocessing_time": 16.949500799179077,
+    "feature_extraction_time": 0,
+    "similarity_computation_time": 0,
+    "filtering_time": 0,
+    "cache_hits": 14,
+    "cache_misses": 0
+  },
+  "cpu_threads": 32,
+  "gpu_enabled": true,
+  "gpu_backend": "PyTorch",
+  "system_info": {
+    "cpu_count": 48,
+    "memory_total_gb": 190.64570999145508,
+    "memory_available_gb": 141.2052230834961
+  },
+  "data_stats": {
+    "total_compounds": 4993,
+    "reference_compounds": 14,
+    "library_compounds": 4993,
+    "hits_count": 3,
+    "hit_rate": 0.0006008411776487082
+  },
+  "config_used": {
+    "data": {
+      "references_csv": "data/references.csv",
+      "library_csv": "data/library_5k.csv"
+    },
+    "fingerprints": {
+      "morgan_radius": 2,
+      "morgan_nbits": 2048
+    },
+    "mol2vec": {
+      "model_path": "models/mol2vec_model.pkl"
+    },
+    "similarity": {
+      "w_1d": 0.4,
+      "w_2d": 0.4,
+      "w_3d": 0.2
+    },
+    "filters": {
+      "pains": true,
+      "cns_filter": true
+    },
+    "cns_rules": {
+      "mw_min": 150,
+      "mw_max": 500,
+      "tpsa_max": 90,
+      "hbd_max": 5,
+      "hba_max": 10,
+      "rotb_max": 10,
+      "logp_min": -3,
+      "logp_max": 5
+    },
+    "shape3d": {
+      "num_confs": 5,
+      "seed": 42,
+      "max_attempts": 50,
+      "prune_rms_thresh": 0.5,
+      "use_mmff": true
+    },
+    "ai_model": {
+      "similarity_threshold": 0.75,
+      "use_clustering": true,
+      "use_outlier_filter": true
+    },
+    "performance": {
+      "chunk_size": 10000,
+      "max_results": 50000,
+      "use_streaming": false
+    },
+    "output": {
+      "dir": "outputs/gpu_cpu_5k_ultrafast_20251014_220944",
+      "hits_csv": "screening_hits.csv",
+      "report_txt": "screening_report.txt"
+    }
+  }
+}

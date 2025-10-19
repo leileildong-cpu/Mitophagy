@@ -1,0 +1,68 @@
+
+# ==========================================
+# 🚀 超高速虚拟筛选系统配置文件
+# ==========================================
+
+data:
+  references_csv: data/references.csv
+  library_csv: data/library_5k.csv  # 利用强大性能处理大数据集
+
+# 📁 输出配置
+output:
+  dir: outputs/gpu_cpu_5k          # 输出目录
+  hits_csv: screening_hits.csv       # 筛选结果文件
+  report_txt: screening_report.txt    # 报告文件
+
+
+# 🧬 分子指纹参数
+fingerprints:
+  morgan_radius: 2          # Morgan指纹半径
+  morgan_nbits: 2048        # Morgan指纹位数
+
+# 🤖 Mol2vec模型配置
+mol2vec:
+  model_path: "models/mol2vec_model.pkl"  # Mol2vec预训练模型路径
+
+# 🎯 相似性权重配置
+similarity:
+  w_1d: 0.33                 # 1D特征权重 (Mol2vec/Morgan)
+  w_2d: 0.34                 # 2D特征权重 (药效团指纹)
+  w_3d: 0.33                 # 3D特征权重 (形状相似性)
+
+# 🔍 过滤器配置
+filters:
+  pains: true               # 启用PAINS过滤
+  cns_filter: true          # 启用CNS药物规则过滤
+
+  # CNS药物规则参数
+cns_rules:
+    mw_min: 150             # 最小分子量
+    mw_max: 500             # 最大分子量
+    tpsa_max: 90            # 最大极性表面积 (修复: tpsa → tpsa_max)
+    hbd_max: 5              # 最大氢键供体数
+    hba_max: 10             # 最大氢键受体数
+    rotb_max: 10            # 最大可旋转键数 (修复: rotb → rotb_max)
+    logp_min: -3            # 最小LogP (修复: logp → logp_min)
+    logp_max: 5             # 最大LogP (修复: logp → logp_max)
+
+
+# 🎨 3D形状相似性配置
+shape3d:
+  num_confs: 5              # 构象数量
+  seed: 42                  # 随机种子
+  max_attempts: 50          # 最大尝试次数
+  prune_rms_thresh: 0.5     # RMS阈值
+  use_mmff: true            # 使用MMFF力场优化
+
+# 🤖 AI模型配置
+ai_model:
+  similarity_threshold: 0.75    # 相似性阈值
+  use_clustering: true          # 启用聚类分析
+  use_outlier_filter: true      # 启用异常值检测
+
+# ⚡ 性能优化配置
+performance:
+  chunk_size: 10000            # 流式处理块大小
+  max_results: 50000           # 最大结果数量
+  use_streaming: false         # 是否启用流式处理（大数据集）
+

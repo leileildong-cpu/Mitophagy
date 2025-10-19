@@ -1,0 +1,90 @@
+{
+  "processing_time_seconds": 81.81049847602844,
+  "performance_stats": {
+    "preprocessing_time": 17.35500192642212,
+    "feature_extraction_time": 37.777003049850464,
+    "similarity_computation_time": 21.805501461029053,
+    "filtering_time": 4.651493072509766,
+    "cache_hits": 14,
+    "cache_misses": 707
+  },
+  "cpu_threads": 32,
+  "gpu_enabled": true,
+  "gpu_backend": "PyTorch",
+  "system_info": {
+    "cpu_count": 48,
+    "memory_total_gb": 190.64570999145508,
+    "memory_available_gb": 138.3410758972168
+  },
+  "data_stats": {
+    "total_compounds": 693,
+    "reference_compounds": 14,
+    "library_compounds": 693,
+    "hits_count": 0,
+    "hit_rate": 0.0
+  },
+  "config_used": {
+    "data": {
+      "references_csv": "data/references.csv",
+      "library_csv": "data/mitophagy_library_2k/library.csv"
+    },
+    "output": {
+      "dir": "mit_outputs/mit_2k_ultrafast_20251015_185131",
+      "hits_csv": "screening_hits.csv",
+      "report_txt": "screening_report.txt"
+    },
+    "fingerprints": {
+      "morgan_radius": 2,
+      "morgan_nbits": 2048
+    },
+    "mol2vec": {
+      "model_path": "models/mol2vec_model.pkl"
+    },
+    "similarity": {
+      "w_1d": 0.33,
+      "w_2d": 0.34,
+      "w_3d": 0.33
+    },
+    "filters": {
+      "pains": true,
+      "cns_filter": true,
+      "cns_rules": {
+        "mw_min": 130,
+        "mw_max": 725,
+        "logp_min": -7,
+        "logp_max": 5.5,
+        "hbd_max": 7,
+        "hba_max": 12,
+        "tpsa_max": 200,
+        "rotb_max": 11
+      }
+    },
+    "cns_rules": {
+      "mw_min": 150,
+      "mw_max": 500,
+      "tpsa_max": 90,
+      "hbd_max": 5,
+      "hba_max": 10,
+      "rotb_max": 10,
+      "logp_min": -3,
+      "logp_max": 5
+    },
+    "shape3d": {
+      "num_confs": 5,
+      "seed": 42,
+      "max_attempts": 50,
+      "prune_rms_thresh": 0.5,
+      "use_mmff": true
+    },
+    "ai_model": {
+      "similarity_threshold": 0.75,
+      "use_clustering": true,
+      "use_outlier_filter": true
+    },
+    "performance": {
+      "chunk_size": 10000,
+      "max_results": 50000,
+      "use_streaming": false
+    }
+  }
+}

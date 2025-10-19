@@ -1,0 +1,38 @@
+ai_model:
+  similarity_threshold: 0.4
+  use_clustering: true
+  use_outlier_filter: false
+data:
+  library_csv: data/library_200.csv
+  references_csv: data/references.csv
+filters:
+  cns_filter: true
+  cns_rules:
+    hba_max: 10
+    hbd_max: 5
+    logp_max: 6.0
+    logp_min: -1.0
+    mw_max: 600
+    mw_min: 150
+    rotb_max: 12
+    tpsa_max: 120
+  pains: true
+fingerprints:
+  morgan_nbits: 2048
+  morgan_radius: 2
+mol2vec:
+  model_path: null
+output:
+  dir: outputs/complete_screening_hybrid_20250924_002810
+  hits_csv: hits.csv
+  report_txt: report.txt
+shape3d:
+  max_attempts: 100
+  num_confs: 10
+  prune_rms_thresh: 0.5
+  seed: 42
+  use_mmff: true
+similarity:
+  w_1d: 0.6
+  w_2d: 0.4
+  w_3d: 0.0

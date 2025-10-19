@@ -1,0 +1,47 @@
+data:
+  references_csv: data/references.csv
+  library_csv: data/mitophagy_library_2w/library.csv
+
+output:
+  dir: mit_outputs/temp_fix
+  hits_csv: screening_hits.csv
+  report_txt: screening_report.txt
+
+fingerprints:
+  morgan_radius: 2
+  morgan_nbits: 2048
+
+mol2vec:
+  model_path: "models/mol2vec_model.pkl"
+
+similarity:
+  w_1d: 0.0      # 禁用1D（因为它返回0）
+  w_2d: 1.0      # 完全依赖2D
+  w_3d: 0.0      # 暂时禁用3D
+
+filters:
+  pains: false
+  cns_filter: false
+
+shape3d:
+  num_confs: 1
+  seed: 42
+  max_attempts: 5
+  prune_rms_thresh: 0.5
+  use_mmff: false
+
+ai_model:
+  similarity_threshold: 0.30
+  use_clustering: true
+  use_outlier_filter: false
+
+performance:
+  chunk_size: 10000
+  max_results: 50000
+  use_streaming: false
+
+screening:
+  batch_size: 10000
+  top_n: 2000
+  min_score: 0.20
+  max_results: 10000

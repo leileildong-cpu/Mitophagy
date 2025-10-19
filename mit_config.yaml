@@ -1,0 +1,72 @@
+# ==========================================
+# 🚀 完整2k化合物库三维虚拟筛选配置
+# 完全启用 1D + 2D + 3D
+# ==========================================
+
+data:
+  references_csv: data/references.csv
+  library_csv: data/mitophagy_library/library.csv  # 完整2k库
+
+# 📁 输出配置
+output:
+  dir: mit_outputs/final_screening  # 新的输出目录
+  hits_csv: screening_hits.csv
+  report_txt: screening_report.txt
+
+# 🧬 分子指纹参数
+fingerprints:
+  morgan_radius: 2
+  morgan_nbits: 2048
+
+# 🤖 Mol2vec模型配置（如果有）
+mol2vec:
+  model_path: "models/mol2vec_model.pkl"
+
+# 🎯 相似性权重配置（完整三维）
+similarity:
+  w_1d: 0.33     # Morgan指纹（结构相似性）
+  w_2d: 0.34      # 药效团指纹（功能相似性）
+  w_3d: 0.33     # 3D形状（空间构象相似性）
+
+# 🔍 过滤器配置（宽松设置）
+filters:
+  pains: false              # 关闭PAINS（避免误杀）
+  cns_filter: false         # 关闭CNS过滤
+
+  # CNS规则（如果启用的话）
+  cns_rules:
+    mw_min: 100
+    mw_max: 800
+    tpsa_max: 250
+    hbd_max: 10
+    hba_max: 15
+    rotb_max: 15
+    logp_min: -5
+    logp_max: 8
+
+# 🎨 3D形状相似性配置（优化速度）
+shape3d:
+  num_confs: 1              # 减少到1个构象（大幅提速）
+  seed: 42
+  max_attempts: 20          # 减少尝试次数
+  prune_rms_thresh: 0.5
+  use_mmff: false           # 禁用MMFF优化（提速）
+
+# 🤖 AI模型配置
+ai_model:
+  similarity_threshold: 0.6    # 降低阈值（发现更多候选）
+  use_clustering: true
+  use_outlier_filter: false     # 禁用异常值检测（提速）
+
+# ⚡ 性能优化配置（针对2k化合物优化）
+performance:
+  chunk_size: 10000         # 批处理大小
+  max_results: 50000        # 最大结果数
+  use_streaming: false      # 2k数据量不需要流式
+
+# 🎯 筛选参数
+screening:
+  batch_size: 10000
+  top_n: 2000              # 保留Top 2000
+  min_score: 0.5          # 最低分数阈值
+  max_results: 10000       # 最多保留10000个结果

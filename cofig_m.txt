@@ -1,0 +1,53 @@
+data:
+  references_csv: data/references.csv
+  library_csv: data/library.csv
+
+output:
+  dir: outputs
+  hits_csv: hits.csv
+  full_csv: full_scores.csv
+  report_txt: report.txt
+
+oneD:
+  mode: mol2vec   # mol2vec 或 morgan
+  # Mol2vec设置（当 mode=mol2vec 时生效）
+  mol2vec:
+    model_path: /ABSOLUTE/PATH/TO/model_300dim.bin   # 改为你的mol2vec模型路径
+    radius: 1
+    unseen_token: UNK
+  # Morgan兜底设置（当 mode=morgan 或 mol2vec模型加载失败时使用）
+  morgan:
+    radius: 2
+    nbits: 2048
+
+twoD:
+  pharm2d: gobbi  # RDKit内置Gobbi_Pharm2D
+
+threeD:
+  # 先用1D+2D融合预排序，再对Top-N做3D，极大加速
+  pre3d_topn: 200
+  conformers_per_mol: 8
+  rdkit_seed: 1337
+  prune_rms: 0.2
+  mm_opt: MMFF   # 可选 MMFF / UFF / NONE
+
+fusion:
+  w1d: 0.33
+  w2d: 0.33
+  w3d: 0.34
+  # 综合相似度阈值（论文中使用≥0.75的思路）
+  score_threshold: 0.75
+  top_k_preview: 20
+
+filters:
+  pains: true
+  cns: true
+  cns_rules:
+    mw_min: 180
+    mw_max: 480
+    tpsa_max: 90
+    hbd_max: 2
+    hba_max: 7
+    rotb_max: 8
+    logp_min: 1.0
+    logp_max: 5.0

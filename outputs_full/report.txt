@@ -1,0 +1,33 @@
+=== Mitophagy-like VS (1D+2D+3D) Report ===
+References: 14; Library: 200
+Weights: w1D=0.33, w2D=0.33, w3D=0.34
+Score threshold: 0.6; Top-K: 20
+
+Top-K preview:
+- 719609 | COCONUT | score=0.738 | PAINS=False | CNS=True
+- 531326 | COCONUT | score=0.711 | PAINS=True | CNS=False
+- 529342 | COCONUT | score=0.680 | PAINS=False | CNS=False
+- 442336 | COCONUT | score=0.678 | PAINS=False | CNS=False
+- 732704 | COCONUT | score=0.675 | PAINS=True | CNS=False
+- 719077 | COCONUT | score=0.650 | PAINS=False | CNS=False
+- 532459 | COCONUT | score=0.646 | PAINS=False | CNS=False
+- 532594 | COCONUT | score=0.644 | PAINS=False | CNS=False
+- 729058 | COCONUT | score=0.644 | PAINS=False | CNS=False
+- 934343 | COCONUT | score=0.641 | PAINS=False | CNS=False
+- 528111 | COCONUT | score=0.638 | PAINS=False | CNS=False
+- 525255 | COCONUT | score=0.627 | PAINS=False | CNS=False
+- 729526 | COCONUT | score=0.625 | PAINS=False | CNS=True
+- 723633 | COCONUT | score=0.622 | PAINS=False | CNS=True
+- 722499 | COCONUT | score=0.613 | PAINS=False | CNS=False
+- 718543 | COCONUT | score=0.603 | PAINS=True | CNS=False
+- 236834 | COCONUT | score=0.597 | PAINS=True | CNS=False
+- 729450 | COCONUT | score=0.591 | PAINS=False | CNS=False
+- 729349 | COCONUT | score=0.591 | PAINS=False | CNS=True
+- 692109 | COCONUT | score=0.573 | PAINS=False | CNS=False
+
+Hits (score>=threshold): 16
+
+3D Shape Statistics:
+Reference conformers generated: 26
+Library conformers generated: 538
+Average 3D similarity: 0.332

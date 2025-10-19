@@ -1,0 +1,88 @@
+# NLRP3虚拟筛选配置文件
+
+# 项目信息
+project_name: "NLRP3_Inhibitor_Screening"
+target_protein: "NLRP3"
+
+# 数据路径
+data:
+  references_csv: "data/nlrp3_references.csv"  # 参考分子CSV
+  library_csv: "data/nlrp3_library_2k/library.csv"    # 筛选库CSV
+
+# 输出设置
+output:
+  dir: "outputs/nlrp3_screening_2k"
+  hits_csv: "nlrp3_hits.csv"
+  report_txt: "nlrp3_report.txt"
+  generate_html_report: true
+  generate_plots: true
+
+# 指纹参数
+fingerprints:
+  morgan_radius: 3
+  morgan_nbits: 2048
+
+# 相似性权重
+similarity:
+  w_1d: 0.35    # Morgan指纹权重
+  w_2d: 0.40    # 药效团权重
+  w_3d: 0.25    # 3D形状权重
+
+# AI模型参数
+ai_model:
+  similarity_threshold: 0.30  # 相似性阈值
+
+# 过滤器设置
+filters:
+  nlrp3_filter: true
+  pains: true
+  brenk: true
+
+  # NLRP3特异性规则
+  nlrp3_rules:
+    mw_min: 200
+    mw_max: 600
+    logp_min: 1.5
+    logp_max: 5.0
+    hbd_max: 3
+    hba_max: 8
+    tpsa_min: 40
+    tpsa_max: 140
+    rotb_max: 10
+    aromatic_rings_min: 2
+    aromatic_rings_max: 4
+
+  # ADMET规则
+  admet_rules:
+    caco2_permeability: -5.5
+    bioavailability_min: 0.3
+
+  # 毒性规则
+  toxicity_rules:
+    mutagenicity: true
+    hepatotoxicity: true
+    cardiotoxicity: true
+
+# 分子对接
+docking:
+  enabled: false  # 暂时禁用对接（如果没有Vina/Smina）
+  protein_pdb: "data/nlrp3_protein.pdb"
+  binding_site:
+    center: [0, 0, 0]
+    box_size: [20, 20, 20]
+  exhaustiveness: 8
+  num_modes: 10
+  max_molecules: 50
+
+# 性能设置
+performance:
+  max_workers: 16           # CPU线程数（根据你的CPU调整）
+  use_cache: true
+  cache_size: 20000
+  use_gpu: false            # 如果没有GPU，设置为false
+  gpu_backend: "pytorch"    # pytorch 或 cupy
+  use_checkpoint: true      # 启用断点续传
+
+# 日志设置
+logging:
+  level: "INFO"

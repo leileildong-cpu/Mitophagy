@@ -1,0 +1,18 @@
+=== Mitophagy-like VS (1D+2D+3D) Report ===
+References: 14; Library: 200
+Weights: w1D=0.5, w2D=0.5, w3D=0.0
+Score threshold: 0.6; Top-K: 10
+
+Top-K preview:
+- 719609 | COCONUT | score=0.753 | PAINS=False | CNS=True
+- 442336 | COCONUT | score=0.736 | PAINS=False | CNS=False
+- 732704 | COCONUT | score=0.666 | PAINS=True | CNS=False
+- 531326 | COCONUT | score=0.631 | PAINS=True | CNS=False
+- 692109 | COCONUT | score=0.630 | PAINS=False | CNS=False
+- 529342 | COCONUT | score=0.627 | PAINS=False | CNS=False
+- 525255 | COCONUT | score=0.620 | PAINS=False | CNS=False
+- 729349 | COCONUT | score=0.578 | PAINS=False | CNS=True
+- 528111 | COCONUT | score=0.576 | PAINS=False | CNS=False
+- 719077 | COCONUT | score=0.548 | PAINS=False | CNS=False
+
+Hits (score>=threshold): 7

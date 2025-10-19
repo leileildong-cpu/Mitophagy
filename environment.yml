@@ -1,0 +1,26 @@
+name: mitophagy
+channels:
+  - conda-forge
+dependencies:
+  # Python 与 RDKit：建议固定到这对“稳定组合”
+  - python=3.10
+  - rdkit=2022.09.5
+
+  # 科学计算与数据处理（与 Python 3.10 / RDKit 2022.09 兼容的版本段）
+  - numpy=1.24.*
+  - pandas=1.5.*
+  - scikit-learn=1.2.*
+  - tqdm=4.66.*
+  - pyyaml=6.0.*
+
+  # 基础工具
+  - pip
+
+  # 可选依赖（按需取消注释）
+  # - faiss-cpu>=1.7      # 大库相似度“先粗后精”召回用；如遇冲突先注释掉
+  # - openbabel           # 若需要做额外格式转换（当前工程非必需）
+  # - pillow              # 若后续想做分子图片渲染（当前工程非必需）
+  # - cairo               # 与pillow一起用于更高质量渲染（当前工程非必需）
+
+  # pip:
+  #   -  # 暂无pip必需项；如需额外库可在此添加

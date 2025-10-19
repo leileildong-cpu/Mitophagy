@@ -1,0 +1,22 @@
+# 筛选库配置
+raw_data_dir: "data/chembl_raw"
+output_dir: "data/library_100"
+sdf_path: "data/chembl_raw/chembl_36.sdf.gz"
+
+# 过滤条件
+filters:
+  mw_min: 150
+  mw_max: 500
+  logp_min: -3
+  logp_max: 5
+  hbd_max: 5
+  hba_max: 10
+  tpsa_max: 140
+  rotb_max: 10
+  heavy_atoms_min: 10
+  heavy_atoms_max: 50
+
+# 处理参数
+processing:
+  max_workers: 4
+  chunk_size: 10000

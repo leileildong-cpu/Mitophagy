@@ -1,0 +1,74 @@
+# nlrp3_library_config.yaml - NLRP3抑制剂筛选专用配置
+
+# 数据源配置
+raw_data_dir: "data/chembl_raw"
+output_dir: "data/nlrp3_library"
+sdf_path: "data/chembl_raw/chembl_36.sdf.gz"
+
+# NLRP3特异性过滤规则
+filters:
+  # 基于已知NLRP3抑制剂的特征优化
+  mw_min: 250              # 比通用规则更严格
+  mw_max: 600              # 允许更大分子
+
+  logp_min: 1.5            # 偏向亲脂性
+  logp_max: 6.0            # 允许更高脂溶性
+
+  hbd_max: 3               # 更少氢键供体
+  hba_max: 8               # 适中氢键受体
+
+  tpsa_min: 30             # 新增：最小极性要求
+  tpsa_max: 120            # 更宽松的上限
+
+  rotb_max: 10             # 允许一定柔性
+
+  heavy_atoms_min: 15      # 更大的最小原子数
+  heavy_atoms_max: 45      # 适中的最大值
+
+  # NLRP3特异性规则
+  aromatic_rings_min: 2    # 至少2个芳香环
+  aromatic_rings_max: 5    # 不超过5个
+
+  # 优先保留的结构特征
+  preferred_features:
+    - "sulfonamide"        # 磺酰胺基团（如MCC950）
+    - "pyridine"           # 吡啶环
+    - "pyrimidine"         # 嘧啶环
+    - "imidazole"          # 咪唑环
+    - "benzamide"          # 苯甲酰胺
+    - "halogen"            # 卤素取代
+
+# 处理参数
+processing:
+  max_workers: 4
+  chunk_size: 10000
+
+  # NLRP3特定筛选
+  target_specific_filtering: true
+  use_pharmacophore_filter: true  # 启用药效团过滤
+
+# 药效团模型（基于MCC950结构）
+pharmacophore_model:
+  required_features:
+    - type: "aromatic"
+      count: [2, 4]
+    - type: "hydrogen_bond_acceptor"
+      count: [2, 6]
+    - type: "hydrophobic"
+      count: [2, 5]
+
+  optional_features:
+    - type: "hydrogen_bond_donor"
+      count: [0, 3]
+    - type: "positive_ionizable"
+      count: [0, 1]
+
+# 相似性搜索（如果有已知活性化合物）
+similarity_search:
+  enabled: true
+  reference_compounds:
+    - "MCC950"
+    - "CY-09"
+    - "OLT1177"
+  similarity_threshold: 0.6
+  fingerprint_type: "ECFP6"  # 更大的fingerprint

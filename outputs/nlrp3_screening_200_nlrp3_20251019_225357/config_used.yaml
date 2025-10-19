@@ -1,0 +1,67 @@
+ai_model:
+  similarity_threshold: 0.3
+data:
+  library_csv: data/nlrp3_library_200.csv
+  references_csv: data/nlrp3_references.csv
+docking:
+  binding_site:
+    box_size:
+    - 20
+    - 20
+    - 20
+    center:
+    - 0
+    - 0
+    - 0
+  enabled: false
+  exhaustiveness: 8
+  max_molecules: 50
+  num_modes: 10
+  protein_pdb: data/nlrp3_protein.pdb
+filters:
+  admet_rules:
+    bioavailability_min: 0.3
+    caco2_permeability: -5.5
+  brenk: true
+  nlrp3_filter: true
+  nlrp3_rules:
+    aromatic_rings_max: 4
+    aromatic_rings_min: 2
+    hba_max: 8
+    hbd_max: 3
+    logp_max: 5.0
+    logp_min: 1.5
+    mw_max: 600
+    mw_min: 200
+    rotb_max: 10
+    tpsa_max: 140
+    tpsa_min: 40
+  pains: true
+  toxicity_rules:
+    cardiotoxicity: true
+    hepatotoxicity: true
+    mutagenicity: true
+fingerprints:
+  morgan_nbits: 2048
+  morgan_radius: 3
+logging:
+  level: INFO
+output:
+  dir: outputs/nlrp3_screening_200
+  generate_html_report: true
+  generate_plots: true
+  hits_csv: nlrp3_hits.csv
+  report_txt: nlrp3_report.txt
+performance:
+  cache_size: 20000
+  gpu_backend: pytorch
+  max_workers: 16
+  use_cache: true
+  use_checkpoint: true
+  use_gpu: false
+project_name: NLRP3_Inhibitor_Screening
+similarity:
+  w_1d: 0.35
+  w_2d: 0.4
+  w_3d: 0.25
+target_protein: NLRP3

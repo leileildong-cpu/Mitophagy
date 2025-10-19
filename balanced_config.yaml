@@ -1,0 +1,51 @@
+data:
+  references_csv: data/references.csv
+  library_csv: data/mitophagy_library_200/library.csv
+
+output:
+  dir: mit_outputs/balanced_3d
+  hits_csv: screening_hits.csv
+  report_txt: screening_report.txt
+
+fingerprints:
+  morgan_radius: 2
+  morgan_nbits: 2048
+
+mol2vec:
+  model_path: "models/mol2vec_model.pkl"
+
+# ========== 平衡的三维权重 ==========
+similarity:
+  w_1d: 0.4      # Morgan指纹
+  w_2d: 0.4      # 药效团
+  w_3d: 0.2      # 3D形状
+# ====================================
+
+filters:
+  pains: false
+  cns_filter: false
+
+# ========== 启用3D计算 ==========
+shape3d:
+  num_confs: 3
+  seed: 42
+  max_attempts: 15
+  prune_rms_thresh: 0.5
+  use_mmff: true
+# ================================
+
+ai_model:
+  similarity_threshold: 0.35  # 调整阈值
+  use_clustering: true
+  use_outlier_filter: false
+
+performance:
+  chunk_size: 10000
+  max_results: 50000
+  use_streaming: false
+
+screening:
+  batch_size: 10000
+  top_n: 2000
+  min_score: 0.25
+  max_results: 10000

@@ -1,0 +1,31 @@
+ai_model:
+  similarity_threshold: 0.6
+  use_clustering: false
+  use_outlier_filter: false
+data:
+  library_csv: data/library_50.csv
+  references_csv: data/references.csv
+filters:
+  cns_filter: false
+  cns_rules: {}
+  pains: false
+fingerprints:
+  morgan_nbits: 2048
+  morgan_radius: 2
+mol2vec:
+  model_path: null
+output:
+  dir: outputs/morgan_test
+  hits_csv: hits.csv
+  report_txt: report.txt
+pharm2d:
+  use_gobbi: true
+shape3d:
+  num_confs: 0
+similarity:
+  w_1d: 1.0
+  w_2d: 0.0
+  w_3d: 0.0
+thresholds:
+  combined_min: 0.5
+  top_k: 20

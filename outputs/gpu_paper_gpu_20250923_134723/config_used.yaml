@@ -1,0 +1,47 @@
+ai_model:
+  similarity_threshold: 0.75
+  use_clustering: true
+  use_outlier_filter: true
+data:
+  library_csv: data/library_5000.csv
+  references_csv: data/references.csv
+filters:
+  cns_filter: true
+  cns_rules:
+    hba_max: 7
+    hbd_max: 2
+    logp_max: 5.0
+    logp_min: 1.0
+    mw_max: 480
+    mw_min: 180
+    rotb_max: 8
+    tpsa_max: 90
+  pains: true
+fingerprints:
+  morgan_nbits: 2048
+  morgan_radius: 2
+gpu:
+  batch_size: 1000
+  memory_limit: 0.8
+  precision: float32
+mol2vec:
+  model_path: models/mol2vec_model.pkl
+output:
+  dir: outputs/gpu_paper_gpu_20250923_134723
+  hits_csv: hits_detailed.csv
+  report_txt: screening_report.txt
+pharm2d:
+  use_gobbi: true
+shape3d:
+  max_attempts: 100
+  num_confs: 10
+  prune_rms_thresh: 0.5
+  seed: 42
+  use_mmff: true
+similarity:
+  w_1d: 0.33
+  w_2d: 0.33
+  w_3d: 0.34
+thresholds:
+  combined_min: 0.75
+  top_k: 100

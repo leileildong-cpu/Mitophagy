@@ -1,0 +1,34 @@
+ai_model:
+  similarity_threshold: 0.6
+  use_clustering: true
+  use_outlier_filter: true
+data:
+  library_csv: data/nlrp3_library_20w/library.csv
+  references_csv: data/references.csv
+filters:
+  cns_filter: false
+  cns_rules:
+    hba_max: 8
+    hbd_max: 3
+    logp_max: 6.0
+    logp_min: 1.5
+    mw_max: 600
+    mw_min: 250
+    rotb_max: 10
+    tpsa_max: 120
+  pains: true
+fingerprints:
+  morgan_nbits: 2048
+  morgan_radius: 3
+output:
+  dir: nlrp3_outputs/nlrp3_20w_ultrafast_20251015_174821
+  hits_csv: hits.csv
+  report_txt: report.txt
+performance:
+  chunk_size: 20000
+  max_results: 20000
+  use_streaming: true
+similarity:
+  w_1d: 0.6
+  w_2d: 0.4
+  w_3d: 0.0

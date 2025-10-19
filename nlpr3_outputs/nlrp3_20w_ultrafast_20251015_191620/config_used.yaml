@@ -1,0 +1,100 @@
+ai_model:
+  clustering:
+    method: kmeans
+    n_clusters: 8
+  similarity_search:
+    enabled: true
+    fingerprint_type: ECFP6
+    min_similarity: 0.6
+  similarity_threshold: 0.5
+  use_clustering: true
+  use_outlier_filter: true
+data:
+  library_csv: data/nlrp3_library_20w/library.csv
+  references_csv: data/nlrp3_references.csv
+filters:
+  cns_filter: false
+  cns_rules:
+    hba_max: 12
+    hbd_max: 7
+    logp_max: 5.5
+    logp_min: -7
+    mw_max: 725
+    mw_min: 130
+    rotb_max: 11
+    tpsa_max: 200
+  nlrp3_rules:
+    aromatic_rings_max: 5
+    aromatic_rings_min: 2
+    hba_max: 8
+    hbd_max: 3
+    heavy_atoms_max: 45
+    heavy_atoms_min: 15
+    logp_max: 6.0
+    logp_min: 1.5
+    mw_max: 600
+    mw_min: 250
+    rotb_max: 10
+    tpsa_max: 120
+    tpsa_min: 30
+  nlrp3_specific: true
+  pains: true
+  preferred_features:
+    benzamide: 1.2
+    halogen: 1.0
+    imidazole: 1.5
+    pyridine: 1.5
+    pyrimidine: 1.5
+    sulfonamide: 2.0
+    urea: 1.3
+fingerprints:
+  morgan_nbits: 2048
+  morgan_radius: 3
+mol2vec:
+  model_path: models/mol2vec_model.pkl
+output:
+  dir: nlpr3_outputs/nlrp3_20w_ultrafast_20251015_191620
+  hits_csv: nlrp3_hits.csv
+  report_txt: nlrp3_screening_report.txt
+performance:
+  chunk_size: 10000
+  max_results: 50000
+  use_streaming: false
+scoring:
+  bonus_for_known_scaffolds: 0.1
+  druglikeness_weight: 0.2
+  penalty_for_complexity: 0.05
+  similarity_weight: 0.5
+  structure_weight: 0.3
+shape3d:
+  max_attempts: 10
+  num_confs: 1
+  prune_rms_thresh: 0.1
+  seed: 42
+  use_mmff: false
+similarity:
+  w_1d: 0.5
+  w_2d: 0.5
+  w_3d: 0.0
+target_specific:
+  avoid_features:
+  - Reactive electrophiles
+  - Michael acceptors (unless validated)
+  - Aldehyde groups
+  - Peroxide groups
+  binding_site: NACHT domain ATP-binding pocket
+  key_interactions:
+  - Hydrogen bond with ATP binding site
+  - Hydrophobic interactions in pocket
+  - "\u03C0-\u03C0 stacking with aromatic residues"
+  target_name: NLRP3
+  target_type: Inflammasome component
+validation:
+  prioritization:
+    diversity_threshold: 0.7
+    max_compounds: 100
+  ranking_criteria:
+  - combined_score
+  - reference_similarity
+  - structural_novelty
+  - druglikeness

@@ -1,0 +1,86 @@
+{
+  "processing_time_seconds": 110.24899864196777,
+  "performance_stats": {
+    "preprocessing_time": 16.537501096725464,
+    "feature_extraction_time": 67.46950268745422,
+    "similarity_computation_time": 25.186498880386353,
+    "filtering_time": 1.0149950981140137,
+    "cache_hits": 14,
+    "cache_misses": 707
+  },
+  "cpu_threads": 32,
+  "gpu_enabled": true,
+  "gpu_backend": "PyTorch",
+  "system_info": {
+    "cpu_count": 48,
+    "memory_total_gb": 190.64570999145508,
+    "memory_available_gb": 169.38922119140625
+  },
+  "data_stats": {
+    "total_compounds": 693,
+    "reference_compounds": 14,
+    "library_compounds": 693,
+    "hits_count": 12,
+    "hit_rate": 0.017316017316017316
+  },
+  "config_used": {
+    "data": {
+      "references_csv": "data/references.csv",
+      "library_csv": "data/mitophagy_library_2k/library.csv"
+    },
+    "output": {
+      "dir": "mit_outputs/final_2k_screening_ultrafast_20251017_012505",
+      "hits_csv": "screening_hits.csv",
+      "report_txt": "screening_report.txt"
+    },
+    "fingerprints": {
+      "morgan_radius": 2,
+      "morgan_nbits": 2048
+    },
+    "mol2vec": {
+      "model_path": "models/mol2vec_model.pkl"
+    },
+    "similarity": {
+      "w_1d": 0.4,
+      "w_2d": 0.4,
+      "w_3d": 0.2
+    },
+    "filters": {
+      "pains": false,
+      "cns_filter": false,
+      "cns_rules": {
+        "mw_min": 100,
+        "mw_max": 800,
+        "tpsa_max": 250,
+        "hbd_max": 10,
+        "hba_max": 15,
+        "rotb_max": 15,
+        "logp_min": -5,
+        "logp_max": 8
+      }
+    },
+    "shape3d": {
+      "num_confs": 1,
+      "seed": 42,
+      "max_attempts": 10,
+      "prune_rms_thresh": 0.5,
+      "use_mmff": false
+    },
+    "ai_model": {
+      "similarity_threshold": 0.25,
+      "use_clustering": true,
+      "use_outlier_filter": false
+    },
+    "performance": {
+      "chunk_size": 10000,
+      "max_results": 50000,
+      "use_streaming": false
+    },
+    "screening": {
+      "batch_size": 10000,
+      "top_n": 2000,
+      "min_score": 0.15,
+      "max_results": 10000
+    }
+  }
+}

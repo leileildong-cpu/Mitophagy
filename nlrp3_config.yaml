@@ -1,0 +1,146 @@
+# ==========================================
+# 🔥 NLRP3抑制剂虚拟筛选配置文件
+# 基于已知NLRP3抑制剂（MCC950, CY-09等）优化
+# ==========================================
+
+# 📊 数据配置
+data:
+  references_csv: data/nlrp3_references.csv  # NLRP3已知抑制剂参考文件
+  library_csv: data/nlrp3_library_2w/library.csv  # NLRP3定制筛选库
+
+# 📁 输出配置
+output:
+  dir: nlpr3_outputs/nlrp3_2w        # NLRP3专用输出目录
+  hits_csv: nlrp3_hits.csv             # 筛选结果文件
+  report_txt: nlrp3_screening_report.txt  # 报告文件
+
+# 🧬 分子指纹参数（NLRP3优化）
+fingerprints:
+  morgan_radius: 3          # 增大到3（NLRP3抑制剂通常分子较大）
+  morgan_nbits: 2048        # 保持2048位
+
+# 🤖 Mol2vec模型配置
+mol2vec:
+  model_path: "models/mol2vec_model.pkl"  # Mol2vec预训练模型路径
+
+# 🎯 相似性权重配置（NLRP3调整）
+similarity:
+  w_1d: 0.1                # ⬆️ 提高1D权重（序列相似性对NLRP3很重要）
+  w_2d: 0.6               # 保持2D权重（药效团）
+  w_3d: 0.3               # ⬇️ 降低3D权重（NLRP3主要看2D药效团）
+
+# 🔍 过滤器配置（NLRP3特异性）
+filters:
+  pains: true               # 启用PAINS过滤
+  cns_filter: false         # ❌ 关闭CNS过滤（NLRP3不在中枢神经系统）
+  nlrp3_specific: true      # ✅ 启用NLRP3特异性过滤
+
+  # NLRP3特异性药物规则（基于MCC950等已知抑制剂）
+  nlrp3_rules:
+    mw_min: 250             # ⬆️ 提高最小分子量（NLRP3抑制剂通常较大）
+    mw_max: 600             # ⬆️ 提高最大分子量（允许更大分子）
+    
+    logp_min: 1.5           # ⬆️ 提高最小LogP（需要一定脂溶性）
+    logp_max: 6.0           # ⬆️ 提高最大LogP（允许更高脂溶性）
+    
+    tpsa_min: 30            # ✅ 新增最小TPSA（避免过于疏水）
+    tpsa_max: 120           # ⬆️ 放宽最大TPSA
+    
+    hbd_max: 3              # ⬇️ 降低氢键供体（NLRP3抑制剂通常较少）
+    hba_max: 8              # ⬇️ 降低氢键受体
+    
+    rotb_max: 10            # 保持可旋转键
+    
+    # NLRP3特有的结构要求
+    aromatic_rings_min: 2   # ✅ 至少2个芳香环
+    aromatic_rings_max: 5   # 不超过5个芳香环
+    
+    heavy_atoms_min: 15     # ⬆️ 最小重原子数
+    heavy_atoms_max: 45     # 适中的最大重原子数
+
+  # 优选的结构特征（基于已知活性化合物）
+  preferred_features:
+    sulfonamide: 2.0        # 磺酰胺基团（如MCC950）权重加倍
+    pyridine: 1.5           # 吡啶环
+    pyrimidine: 1.5         # 嘧啶环
+    imidazole: 1.5          # 咪唑环
+    benzamide: 1.2          # 苯甲酰胺
+    halogen: 1.0            # 卤素取代
+    urea: 1.3               # 脲基团
+
+# 🎨 3D形状相似性配置（NLRP3调整）
+shape3d:
+#  num_confs: 10             # ⬆️ 增加构象数量（更彻底搜索）
+  num_confs: 1
+  seed: 42                  # 随机种子
+  max_attempts: 10
+#  max_attempts: 100         # ⬆️ 增加尝试次数
+  prune_rms_thresh: 0.1     # RMS阈值
+  use_mmff: false            # 使用MMFF力场优化
+
+# 🤖 AI模型配置（NLRP3优化）
+ai_model:
+  similarity_threshold: 0.50    # ⬇️ 降低阈值（NLRP3抑制剂多样性可能较大）
+  use_clustering: true          # 启用聚类分析
+  use_outlier_filter: true      # 启用异常值检测
+  
+  # 聚类参数
+  clustering:
+    n_clusters: 8               # 聚类数量
+    method: "kmeans"            # 聚类方法
+    
+  # 相似性搜索参数
+  similarity_search:
+    enabled: true               # ✅ 启用基于已知活性物的相似性搜索
+    min_similarity: 0.6         # 最小相似性阈值
+    fingerprint_type: "ECFP6"   # 使用ECFP6（更大半径）
+
+# ⚡ 性能优化配置
+performance:
+  chunk_size: 10000            # 流式处理块大小
+  max_results: 50000           # 最大结果数量
+  use_streaming: false         # 是否启用流式处理
+  
+# 📊 打分权重配置（NLRP3专用）
+scoring:
+  # 多维度打分
+  similarity_weight: 0.5       # 相似性得分权重
+  structure_weight: 0.3        # 结构特征得分权重
+  druglikeness_weight: 0.2     # 成药性得分权重
+  
+  # 额外打分因素
+  bonus_for_known_scaffolds: 0.1  # 已知骨架加分
+  penalty_for_complexity: 0.05    # 复杂度惩罚
+
+# 🎯 靶点特异性配置
+target_specific:
+  target_name: "NLRP3"
+  target_type: "Inflammasome component"
+  binding_site: "NACHT domain ATP-binding pocket"
+  
+  # 已知的关键相互作用
+  key_interactions:
+    - "Hydrogen bond with ATP binding site"
+    - "Hydrophobic interactions in pocket"
+    - "π-π stacking with aromatic residues"
+  
+  # 避免的结构特征
+  avoid_features:
+    - "Reactive electrophiles"
+    - "Michael acceptors (unless validated)"
+    - "Aldehyde groups"
+    - "Peroxide groups"
+
+# 📈 验证配置
+validation:
+  # 后续实验验证的优先级
+  prioritization:
+    max_compounds: 100           # 推荐验证的最大化合物数
+    diversity_threshold: 0.7     # 多样性阈值（Tanimoto）
+    
+  # 排序标准
+  ranking_criteria:
+    - "combined_score"           # 首要：组合得分
+    - "reference_similarity"     # 次要：与已知活性物相似性
+    - "structural_novelty"       # 第三：结构新颖性
+    - "druglikeness"            # 第四：成药性

@@ -1,0 +1,33 @@
+=== 论文复现版 Mitophagy VS 报告 ===
+参考分子数: 14
+库分子数: 50
+权重设置: w1D=1.0, w2D=0.0, w3D=0.0
+特征提取: Morgan + 药效团 + 无3D
+
+=== 评估结果 ===
+总化合物数: 50
+命中数 (>=0.6): 8
+命中率: 0.160
+得分统计: 均值=0.314, 中位数=0.247, 最大值=1.000
+
+=== Top-20 候选化合物 ===
+ 1. 525255 | COCONUT | 得分=1.000 | PAINS=否 | CNS=通过
+ 2. 519428 | COCONUT | 得分=0.846 | PAINS=否 | CNS=通过
+ 3. 236834 | COCONUT | 得分=0.819 | PAINS=否 | CNS=通过
+ 4. 464509 | COCONUT | 得分=0.804 | PAINS=否 | CNS=通过
+ 5. 193996 | COCONUT | 得分=0.702 | PAINS=否 | CNS=通过
+ 6. 437069 | COCONUT | 得分=0.649 | PAINS=否 | CNS=通过
+ 7. 519128 | COCONUT | 得分=0.645 | PAINS=否 | CNS=通过
+ 8. 100175 | COCONUT | 得分=0.613 | PAINS=否 | CNS=通过
+ 9. 522784 | COCONUT | 得分=0.574 | PAINS=否 | CNS=通过
+10. 715918 | COCONUT | 得分=0.455 | PAINS=否 | CNS=通过
+11. 522482 | COCONUT | 得分=0.425 | PAINS=否 | CNS=通过
+12. 977453 | COCONUT | 得分=0.410 | PAINS=否 | CNS=通过
+13. 522696 | COCONUT | 得分=0.407 | PAINS=否 | CNS=通过
+14. 440247 | COCONUT | 得分=0.369 | PAINS=否 | CNS=通过
+15. 715883 | COCONUT | 得分=0.340 | PAINS=否 | CNS=通过
+16. 521460 | COCONUT | 得分=0.320 | PAINS=否 | CNS=通过
+17. 521356 | COCONUT | 得分=0.314 | PAINS=否 | CNS=通过
+18. 236322 | COCONUT | 得分=0.293 | PAINS=否 | CNS=通过
+19. 522520 | COCONUT | 得分=0.285 | PAINS=否 | CNS=通过
+20. 235932 | COCONUT | 得分=0.283 | PAINS=否 | CNS=通过

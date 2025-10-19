@@ -1,0 +1,71 @@
+# ==========================================
+# 🚀 超高速虚拟筛选系统配置文件 - 最佳匹配策略
+# ==========================================
+
+data:
+  references_csv: data/references.csv
+  library_csv: data/mitophagy_library_2k/library.csv
+
+# 📁 输出配置
+output:
+  dir: mit_outputs/mit_2k_best_match         # 新的输出目录（避免覆盖）
+  hits_csv: screening_hits.csv
+  report_txt: screening_report.txt
+
+# 🧬 分子指纹参数
+fingerprints:
+  morgan_radius: 2
+  morgan_nbits: 2048
+
+# 🤖 Mol2vec模型配置
+mol2vec:
+  model_path: "models/mol2vec_model.pkl"
+
+# 🎯 相似性权重配置 - 【关键修改】
+similarity:
+  w_1d: 0.5                 # 提高1D权重（Morgan指纹最可靠）
+  w_2d: 0.3                 # 降低2D权重（药效团）
+  w_3d: 0.2                 # 降低3D权重（减少计算量）
+
+# 🔍 过滤器配置 - 【放宽过滤条件】
+filters:
+  pains: true
+  cns_filter: true
+
+  # CNS药物规则参数 - 【关键修改：更宽松的条件】
+  cns_rules:
+    mw_min: 100             # 降低最小分子量（原150→100）
+    mw_max: 800             # 提高最大分子量（原500→800）
+    tpsa_max: 250           # 提高TPSA上限（原90→250）
+    hbd_max: 10             # 提高氢键供体上限（原5→10）
+    hba_max: 15             # 提高氢键受体上限（原10→15）
+    rotb_max: 15            # 提高可旋转键上限（原10→15）
+    logp_min: -5            # 降低LogP下限（原-3→-5）
+    logp_max: 8             # 提高LogP上限（原5→8）
+
+# 🎨 3D形状相似性配置
+shape3d:
+  num_confs: 3              # 减少构象数（原5→3，加速）
+  seed: 42
+  max_attempts: 20          # 减少尝试次数（原50→20，加速）
+  prune_rms_thresh: 0.5
+  use_mmff: true
+
+# 🤖 AI模型配置 - 【关键修改：大幅降低阈值】
+ai_model:
+  similarity_threshold: 0.30    # 大幅降低阈值（原0.75→0.30）
+  use_clustering: true
+  use_outlier_filter: false     # 暂时禁用异常值检测（减少干扰）
+
+# ⚡ 性能优化配置
+performance:
+  chunk_size: 10000
+  max_results: 50000
+  use_streaming: false
+
+# 🎯 筛选参数（新增）
+screening:
+  batch_size: 10000
+  top_n: 1000               # 保留Top 1000结果
+  min_score: 0.20           # 最低得分阈值
+  max_results: 5000

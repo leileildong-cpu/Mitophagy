@@ -1,0 +1,53 @@
+# ==========================================
+# 🧬 线粒体自噬诱导剂筛选库准备配置
+# 适配多样化的天然产物和小分子代谢物
+# ==========================================
+
+# 📁 路径配置
+raw_data_dir: "data/chembl_raw"           # ChEMBL原始数据目录
+output_dir: "data/mitophagy_library_20w"      # 输出目录（线粒体自噬专用库）
+sdf_path: "data/chembl_raw/chembl_36.sdf.gz"  # ChEMBL SDF文件路径
+
+# 🔍 过滤规则配置（极宽松，适应线粒体自噬诱导剂的多样性）
+filters:
+  # 分子量范围 - 包含小分子（Metformin）到大分子（多酚）
+  mw_min: 100                  # ⬇️ 降低至100以包含Metformin(129)、Nicotinamide(122)
+  mw_max: 800                  # ⬆️ 提高至800以包含大的天然产物
+
+  # LogP范围 - 包含极性到亲脂性分子
+  logp_min: -5                 # ⬇️ 包含极性小分子（Metformin, Spermidine）
+  logp_max: 8                  # ⬆️ 包含高脂溶性分子（Tomatidine=5.37）
+
+  # 氢键供体/受体 - 包含多酚类
+  hbd_max: 10                  # ⬆️ 包含EGCG(8)等多羟基化合物
+  hba_max: 15                  # ⬆️ 包含高极性分子
+
+  # 极性表面积 - 大幅放宽
+  tpsa_min: 0                  # 无下限
+  tpsa_max: 250                # ⬆️ 包含EGCG(197)、PQQ(175)等极性分子
+
+  # 可旋转键 - 包含灵活分子
+  rotb_max: 20                 # ⬆️ 包含如Curcumin等柔性分子
+
+  # 重原子数范围
+  heavy_atoms_min: 6           # ⬇️ 降低以包含小分子（Metformin=9）
+  heavy_atoms_max: 60          # ⬆️ 提高以包含大分子
+
+# ⚙️ 处理参数
+processing:
+  max_workers: 4               # 并行处理线程数（根据CPU调整）
+  chunk_size: 10000            # 批处理大小
+
+# 📝 注释
+comments:
+  purpose: "准备适用于线粒体自噬诱导剂虚拟筛选的化合物库"
+  features:
+    - "极宽松的分子量范围(100-800)以包含多样化分子"
+    - "宽LogP范围(-5 to 8)包含极性到脂溶性分子"
+    - "高TPSA上限(250)以包含多酚类天然产物"
+    - "包含小分子代谢物(MW<150)"
+  target_compounds:
+    - "多酚类: Quercetin, Curcumin, Resveratrol, EGCG"
+    - "生物碱: Berberine, Tomatidine"
+    - "小分子: Spermidine, Metformin, Nicotinamide"
+    - "其他天然产物: Urolithin A, PQQ"

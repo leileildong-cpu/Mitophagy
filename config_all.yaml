@@ -1,0 +1,45 @@
+data:
+  references_csv: data/references.csv
+  library_csv: data/library_200.csv
+
+output:
+  dir: outputs/all_200_1
+  hits_csv: hits.csv
+  report_txt: report.txt
+
+similarity:
+  w_1d: 0.6  # Morgan/Mol2vec权重
+  w_2d: 0.4  # 药效团权重
+  w_3d: 0.0  # 3D形状权重
+
+mol2vec:
+  model_path: null  # 设为null使用Morgan指纹
+
+fingerprints:
+  morgan_radius: 2
+  morgan_nbits: 2048
+
+shape3d:
+  num_confs: 10
+  max_attempts: 100
+  prune_rms_thresh: 0.5
+  use_mmff: true
+  seed: 42
+
+ai_model:
+  similarity_threshold: 0.4
+  use_clustering: true
+  use_outlier_filter: false
+
+filters:
+  pains: true
+  cns_filter: true
+  cns_rules:
+    mw_min: 150
+    mw_max: 600
+    tpsa_max: 120
+    hbd_max: 5
+    hba_max: 10
+    rotb_max: 12
+    logp_min: -1.0
+    logp_max: 6.0

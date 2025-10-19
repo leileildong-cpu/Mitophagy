@@ -1,0 +1,27 @@
+# nlrp3_library_config.yaml - NLRP3专用筛选库准备配置
+
+raw_data_dir: "data/chembl_raw"
+output_dir: "data/nlrp3_library_fangs_2k"
+sdf_path: "data/chembl_raw/chembl_36.sdf.gz"
+
+# ⚠️ 关键：使用NLRP3特异性的宽松规则
+filters:
+  mw_min: 200          # ⬇️ 更宽松
+  mw_max: 700          # ⬆️ 更宽松（确保MCC950等能通过）
+
+  logp_min: 0          # ⬇️ 更宽松
+  logp_max: 7          # ⬆️ 更宽松（确保高脂溶性化合物能通过）
+
+  hbd_max: 6           # ⬆️ 稍微宽松
+  hba_max: 12          # ⬆️ 更宽松
+
+  tpsa_max: 150        # ⬆️ 更宽松（NLRP3不需要严格的BBB要求）
+
+  rotb_max: 15         # ⬆️ 更宽松
+
+  heavy_atoms_min: 12  # ⬆️ 提高最小值
+  heavy_atoms_max: 55  # ⬆️ 提高最大值
+
+processing:
+  max_workers: 4
+  chunk_size: 10000

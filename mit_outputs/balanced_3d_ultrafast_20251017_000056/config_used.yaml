@@ -1,0 +1,47 @@
+ai_model:
+  similarity_threshold: 0.35
+  use_clustering: true
+  use_outlier_filter: false
+data:
+  library_csv: data/mitophagy_library_2w/library.csv
+  references_csv: data/references.csv
+filters:
+  cns_filter: false
+  cns_rules:
+    hba_max: 12
+    hbd_max: 7
+    logp_max: 5.5
+    logp_min: -7
+    mw_max: 725
+    mw_min: 130
+    rotb_max: 11
+    tpsa_max: 200
+  pains: false
+fingerprints:
+  morgan_nbits: 2048
+  morgan_radius: 2
+mol2vec:
+  model_path: models/mol2vec_model.pkl
+output:
+  dir: mit_outputs/balanced_3d_ultrafast_20251017_000056
+  hits_csv: screening_hits.csv
+  report_txt: screening_report.txt
+performance:
+  chunk_size: 10000
+  max_results: 50000
+  use_streaming: false
+screening:
+  batch_size: 10000
+  max_results: 10000
+  min_score: 0.25
+  top_n: 2000
+shape3d:
+  max_attempts: 15
+  num_confs: 3
+  prune_rms_thresh: 0.5
+  seed: 42
+  use_mmff: true
+similarity:
+  w_1d: 0.4
+  w_2d: 0.4
+  w_3d: 0.2

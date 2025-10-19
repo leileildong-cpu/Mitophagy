@@ -6,7 +6,7 @@ ADMET预测器
 """
 
 import numpy as np
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 
 
 class ADMETPredictor:
@@ -231,6 +231,48 @@ class ADMETPredictor:
             results['admet_scores'].append(admet_scores)
 
         return results
+
+    @staticmethod
+    def get_default_admet_scores() -> Dict:
+        """
+        获取默认的ADMET评分（用于失败情况）
+
+        Returns:
+            默认ADMET评分字典
+        """
+        return {
+            'lipinski': False,
+            'veber': False,
+            'ghose': False,
+            'caco2_permeability': -999.0,
+            'caco2_pass': False,
+            'bioavailability': 0.0,
+            'bioavailability_pass': False,
+            'bbb_permeability': -999.0,
+            'bbb_pass': False,
+            'plasma_protein_binding': 0.0
+        }
+
+    @staticmethod
+    def get_admet_keys() -> List[str]:
+        """
+        获取所有ADMET指标的键名
+
+        Returns:
+            ADMET键名列表
+        """
+        return [
+            'lipinski',
+            'veber',
+            'ghose',
+            'caco2_permeability',
+            'caco2_pass',
+            'bioavailability',
+            'bioavailability_pass',
+            'bbb_permeability',
+            'bbb_pass',
+            'plasma_protein_binding'
+        ]
 
     def __repr__(self):
         return "ADMETPredictor(Lipinski+Veber+Caco2+Bioavailability)"

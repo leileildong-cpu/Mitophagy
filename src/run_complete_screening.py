@@ -43,6 +43,7 @@ try:
     from src.filters.admet_predictor import ADMETPredictor
     from src.filters.toxicity_checker import ToxicityChecker
     from src.filters.pains_brenk import PAINSBrenkFilter
+
     FILTERS_AVAILABLE = True
 except ImportError as e:
     print(f"[WARNING] 过滤器模块导入失败: {e}")
@@ -164,9 +165,13 @@ class CompleteNLRP3VirtualScreening:
             except Exception as e:
                 self.logger.warning(f"NLRP3过滤器加载失败: {e}")
                 self.nlrp3_filters = None
+                self.admet_predictor = None
+                self.toxicity_checker = None
                 self.pains_brenk_filter = None
         else:
             self.nlrp3_filters = None
+            self.admet_predictor = None
+            self.toxicity_checker = None
             self.pains_brenk_filter = None
 
         self.molecular_docking = MolecularDocking(self.config)
@@ -287,7 +292,6 @@ class CompleteNLRP3VirtualScreening:
         except:
             return None
 
-    # ✅✅✅ 注意：以下方法不要多缩进！ ✅✅✅
     def extract_features(self, df: pd.DataFrame, desc: str) -> Dict:
         """提取分子特征"""
         self.logger.info("=" * 70)
@@ -399,9 +403,19 @@ class CompleteNLRP3VirtualScreening:
         return scores
 
     def apply_filters(self, lib_df: pd.DataFrame, scores: Dict, lib_features: Dict) -> pd.DataFrame:
-        """应用过滤器"""
+        """
+        应用NLRP3特异性和ADMET过滤
+
+        Args:
+            lib_df: 库分子DataFrame
+            scores: 相似性得分字典
+            lib_features: 库分子特征字典
+
+        Returns:
+            pd.DataFrame: 过滤后的结果
+        """
         self.logger.info("=" * 70)
-        self.logger.info("步骤 5/7: 应用NLRP3特异性过滤")
+        self.logger.info("步骤 5/7: 应用NLRP3特异性和ADMET过滤")
         self.logger.info("=" * 70)
 
         start_time = time.time()
@@ -411,93 +425,216 @@ class CompleteNLRP3VirtualScreening:
             self.logger.info("从断点恢复过滤结果...")
             return checkpoint_data['results']
 
+        # 初始化结果DataFrame
         results = lib_df[['id', 'name', 'smiles', 'canonical_smiles']].copy()
         results['combined_score'] = scores['combined_scores']
 
+        # 添加各维度相似性得分
         for key, values in scores['individual_scores'].items():
             results[key] = values
 
+        # 添加分子描述符
         descriptors_list = lib_features['descriptors']
         for col in ['mw', 'logp', 'hbd', 'hba', 'tpsa', 'rotb', 'aromatic_rings', 'heavy_atoms', 'qed']:
             results[col] = [desc.get(col, 0) for desc in descriptors_list]
 
-        if self.nlrp3_filters:
-            self.logger.info("执行NLRP3特异性过滤...")
+        # ===== 关键修改：NLRP3和ADMET过滤 =====
+        if self.nlrp3_filters and self.admet_predictor:
+            self.logger.info("执行NLRP3特异性和ADMET过滤...")
+            self.logger.info(f"待筛选分子数: {len(results)}")
 
             nlrp3_results = []
-            admet_results = []
+            admet_valid_list = []
+            admet_scores_list = []
             toxicity_results = []
+            failed_indices = []
 
-            for i, (idx, row) in enumerate(tqdm(results.iterrows(), total=len(results), desc="NLRP3过滤")):
-                mol = lib_df.loc[idx, 'mol']
+            for i, (idx, row) in enumerate(tqdm(results.iterrows(), total=len(results), desc="NLRP3+ADMET过滤")):
+                try:
+                    mol = lib_df.loc[idx, 'mol']
+                    mol_id = row['id']
 
-                descriptors = {col: row[col] for col in
-                               ['mw', 'logp', 'hbd', 'hba', 'tpsa', 'rotb', 'aromatic_rings', 'heavy_atoms']}
+                    if mol is None:
+                        self.logger.warning(f"无效分子 [{i}] {mol_id}")
+                        nlrp3_results.append({'compliant': False, 'fail_reasons': "Invalid molecule"})
+                        admet_valid_list.append(False)
+                        admet_scores_list.append(ADMETPredictor.get_default_admet_scores())
+                        toxicity_results.append({'is_safe': False, 'alerts': "Invalid molecule"})
+                        failed_indices.append(i)
+                        continue
 
-                is_valid, fail_reasons = self.nlrp3_filters.check_molecule(mol, descriptors)
-                nlrp3_results.append({
-                    'compliant': is_valid,
-                    'fail_reasons': "; ".join(fail_reasons) if fail_reasons else "Pass"
-                })
+                    # 准备描述符
+                    descriptors = {col: row[col] for col in
+                                   ['mw', 'logp', 'hbd', 'hba', 'tpsa', 'rotb', 'aromatic_rings', 'heavy_atoms']}
 
-                admet_scores = self.admet_predictor.predict_admet(mol, descriptors)
-                admet_results.append(admet_scores)
+                    # NLRP3特异性检查
+                    try:
+                        is_compliant, fail_reasons = self.nlrp3_filters.check_molecule(mol, descriptors)
+                        nlrp3_results.append({
+                            'compliant': is_compliant,
+                            'fail_reasons': "; ".join(fail_reasons) if fail_reasons else "Pass"
+                        })
+                    except Exception as e:
+                        self.logger.error(f"NLRP3检查失败 [{i}] {mol_id}: {e}")
+                        nlrp3_results.append({'compliant': False, 'fail_reasons': f"Check failed: {e}"})
 
-                is_safe, alerts = self.toxicity_checker.check_toxicity(mol)
-                toxicity_results.append({
-                    'is_safe': is_safe,
-                    'alerts': "; ".join(alerts) if alerts else "Safe"
-                })
+                    # ===== ADMET预测（正确解包元组） =====
+                    try:
+                        # 正确解包返回的元组 (bool, dict)
+                        is_valid, admet_scores = self.admet_predictor.predict(mol, descriptors)
 
+                        # 验证返回类型
+                        if not isinstance(is_valid, bool):
+                            self.logger.warning(f"ADMET有效性类型错误 [{i}]: {type(is_valid)}，转换为bool")
+                            is_valid = bool(is_valid)
+
+                        if not isinstance(admet_scores, dict):
+                            raise ValueError(f"ADMET评分应为字典，实际: {type(admet_scores)}")
+
+                        admet_valid_list.append(is_valid)
+                        admet_scores_list.append(admet_scores)
+
+                    except Exception as e:
+                        self.logger.error(f"ADMET预测失败 [{i}] {mol_id}: {e}")
+                        admet_valid_list.append(False)
+                        admet_scores_list.append(ADMETPredictor.get_default_admet_scores())
+                        failed_indices.append(i)
+
+                    # 毒性检查
+                    if self.toxicity_checker:
+                        try:
+                            is_safe, alerts = self.toxicity_checker.check_toxicity(mol)
+                            toxicity_results.append({
+                                'is_safe': is_safe,
+                                'alerts': "; ".join(alerts) if alerts else "Safe"
+                            })
+                        except Exception as e:
+                            self.logger.error(f"毒性检查失败 [{i}] {mol_id}: {e}")
+                            toxicity_results.append({'is_safe': False, 'alerts': f"Check failed: {e}"})
+                    else:
+                        toxicity_results.append({'is_safe': True, 'alerts': "Not evaluated"})
+
+                except Exception as e:
+                    self.logger.error(f"处理分子失败 [{i}]: {e}", exc_info=True)
+                    nlrp3_results.append({'compliant': False, 'fail_reasons': f"Processing error: {e}"})
+                    admet_valid_list.append(False)
+                    admet_scores_list.append(ADMETPredictor.get_default_admet_scores())
+                    toxicity_results.append({'is_safe': False, 'alerts': "Processing error"})
+                    failed_indices.append(i)
+
+            # 记录失败情况
+            if failed_indices:
+                self.logger.warning(
+                    f"共 {len(failed_indices)} 个分子处理失败: "
+                    f"{failed_indices[:10]}{'...' if len(failed_indices) > 10 else ''}"
+                )
+
+            # ===== 添加NLRP3结果 =====
             results['nlrp3_compliant'] = [r['compliant'] for r in nlrp3_results]
             results['nlrp3_fail_reasons'] = [r['fail_reasons'] for r in nlrp3_results]
 
-            for key in ['lipinski', 'veber', 'ghose', 'caco2_pass', 'bioavailability_pass']:
-                results[key] = [scores.get(key, False) for scores in admet_results]
+            # ===== 添加ADMET结果（从字典列表中提取） =====
+            results['admet_valid'] = admet_valid_list
 
-            results['bioavailability_score'] = [scores.get('bioavailability', 0) for scores in admet_results]
-            results['caco2_permeability'] = [scores.get('caco2_permeability', 0) for scores in admet_results]
+            # 提取各项ADMET指标
+            admet_keys = ADMETPredictor.get_admet_keys()
+            for key in admet_keys:
+                results[key] = [
+                    score_dict.get(key, None) if isinstance(score_dict, dict) else None
+                    for score_dict in admet_scores_list
+                ]
 
+            # ===== 添加毒性结果 =====
             results['is_safe'] = [r['is_safe'] for r in toxicity_results]
             results['toxicity_alerts'] = [r['alerts'] for r in toxicity_results]
 
+            # 统计信息
+            total = len(results)
             nlrp3_pass = sum(results['nlrp3_compliant'])
-            admet_pass = sum(s['lipinski'] and s['veber'] for s in admet_results)
+            admet_pass = sum(admet_valid_list)
             safe_count = sum(results['is_safe'])
+            all_pass = sum(
+                n and a and s
+                for n, a, s in zip(results['nlrp3_compliant'], admet_valid_list, results['is_safe'])
+            )
 
-            self.logger.info(f"NLRP3过滤结果:")
-            self.logger.info(
-                f"  - NLRP3规则通过: {nlrp3_pass}/{len(results)} ({nlrp3_pass / len(results) * 100:.1f}%)")
-            self.logger.info(f"  - ADMET通过: {admet_pass}/{len(results)} ({admet_pass / len(results) * 100:.1f}%)")
-            self.logger.info(
-                f"  - 安全性通过: {safe_count}/{len(results)} ({safe_count / len(results) * 100:.1f}%)")
+            self.logger.info("=" * 70)
+            self.logger.info("过滤结果统计:")
+            self.logger.info(f"  总分子数: {total}")
+            self.logger.info(f"  NLRP3通过: {nlrp3_pass} ({nlrp3_pass / total * 100:.1f}%)")
+            self.logger.info(f"  ADMET通过: {admet_pass} ({admet_pass / total * 100:.1f}%)")
+            self.logger.info(f"  安全性通过: {safe_count} ({safe_count / total * 100:.1f}%)")
+            self.logger.info(f"  全部通过: {all_pass} ({all_pass / total * 100:.1f}%)")
+            self.logger.info(f"  处理失败: {len(failed_indices)} ({len(failed_indices) / total * 100:.1f}%)")
+            self.logger.info("=" * 70)
+
         else:
+            # 如果没有加载过滤器，使用默认值
+            self.logger.warning("NLRP3/ADMET过滤器未加载，跳过过滤")
             results['nlrp3_compliant'] = True
             results['nlrp3_fail_reasons'] = "Not evaluated"
+            results['admet_valid'] = True
             results['is_safe'] = True
             results['toxicity_alerts'] = "Not evaluated"
 
+        # PAINS过滤
         if self.config.get("filters", {}).get("pains", False) and self.pains_brenk_filter:
             self.logger.info("执行PAINS过滤...")
             results['is_pains'] = self.pains_brenk_filter.batch_check_pains(lib_df['mol'].tolist())
             pains_count = sum(results['is_pains'])
-            self.logger.info(
-                f"  - PAINS阳性: {pains_count}/{len(results)} ({pains_count / len(results) * 100:.1f}%)")
+            self.logger.info(f"  - PAINS阳性: {pains_count}/{len(results)} ({pains_count / len(results) * 100:.1f}%)")
         else:
             results['is_pains'] = False
 
+
+        # Brenk过滤
         if self.config.get("filters", {}).get("brenk", False) and self.pains_brenk_filter:
             self.logger.info("执行Brenk过滤...")
-            brenk_results = self.pains_brenk_filter.batch_check_brenk(lib_df['mol'].tolist())
-            results['brenk_clean'] = [r['is_clean'] for r in brenk_results]
-            results['brenk_alerts'] = [r['alerts'] for r in brenk_results]
-            brenk_pass = sum(results['brenk_clean'])
-            self.logger.info(f"  - Brenk通过: {brenk_pass}/{len(results)} ({brenk_pass / len(results) * 100:.1f}%)")
+            try:
+                brenk_results = self.pains_brenk_filter.batch_check_brenk(lib_df['mol'].tolist())
 
+                # ===== 关键修复：检查返回值类型 =====
+                if isinstance(brenk_results, list) and len(brenk_results) > 0:
+                    # 检查第一个元素的类型
+                    if isinstance(brenk_results[0], dict):
+                        # 返回的是字典列表（正确格式）
+                        results['brenk_clean'] = [r.get('is_clean', False) for r in brenk_results]
+                        results['brenk_alerts'] = [r.get('alerts', '') for r in brenk_results]
+                    elif isinstance(brenk_results[0], (str, bool)):
+                        # 返回的是简单列表（需要转换）
+                        results['brenk_clean'] = [bool(r) if isinstance(r, bool) else (r != 'fail') for r in
+                                                  brenk_results]
+                        results['brenk_alerts'] = ['Pass' if c else 'Failed' for c in results['brenk_clean']]
+                    else:
+                        self.logger.warning(f"Brenk结果类型未知: {type(brenk_results[0])}")
+                        results['brenk_clean'] = [True] * len(lib_df)
+                        results['brenk_alerts'] = ['Not evaluated'] * len(lib_df)
+                else:
+                    # 空列表或其他情况
+                    results['brenk_clean'] = [True] * len(lib_df)
+                    results['brenk_alerts'] = ['Not evaluated'] * len(lib_df)
+
+                brenk_pass = sum(results['brenk_clean'])
+                self.logger.info(f"  - Brenk通过: {brenk_pass}/{len(results)} ({brenk_pass / len(results) * 100:.1f}%)")
+
+            except Exception as e:
+                self.logger.error(f"Brenk过滤失败: {str(e)}")
+                import traceback
+                traceback.print_exc()
+                results['brenk_clean'] = [True] * len(lib_df)
+                results['brenk_alerts'] = ['Check failed'] * len(lib_df)
+        else:
+            results['brenk_clean'] = True
+            results['brenk_alerts'] = 'Not evaluated'
+
+
+        # 计算综合得分
         results['final_score'] = self._calculate_comprehensive_score(results)
 
+        # 按得分排序
         results = results.sort_values('final_score', ascending=False).reset_index(drop=True)
 
+        # 保存断点
         self.checkpoint_manager.save_checkpoint('filtering', {'results': results})
 
         duration = time.time() - start_time
@@ -514,6 +651,7 @@ class CompleteNLRP3VirtualScreening:
         for i in range(n):
             similarity_score = results.loc[i, 'combined_score']
 
+            # ADMET评分
             admet_score = 0.0
             if 'lipinski' in results.columns and results.loc[i, 'lipinski']:
                 admet_score += 0.25
@@ -524,6 +662,7 @@ class CompleteNLRP3VirtualScreening:
             if 'bioavailability_pass' in results.columns and results.loc[i, 'bioavailability_pass']:
                 admet_score += 0.25
 
+            # 安全性评分
             safety_score = 0.0
             if 'is_pains' in results.columns and not results.loc[i, 'is_pains']:
                 safety_score += 0.33
@@ -532,6 +671,7 @@ class CompleteNLRP3VirtualScreening:
             if 'nlrp3_compliant' in results.columns and results.loc[i, 'nlrp3_compliant']:
                 safety_score += 0.34
 
+            # 综合得分（可调整权重）
             final_scores[i] = (
                     0.5 * similarity_score +
                     0.3 * admet_score +
@@ -608,19 +748,23 @@ class CompleteNLRP3VirtualScreening:
 
         start_time = time.time()
 
+        # 保存CSV
         results_csv = os.path.join(self.output_dir, self.config["output"]["hits_csv"])
-        results.to_csv(results_csv, index=False)
+        results.to_csv(results_csv, index=False, encoding='utf-8-sig')
         self.logger.info(f"CSV结果已保存: {results_csv}")
 
+        # 生成文本报告
         self.text_reporter.generate_report(
             results, ref_df, lib_df, processing_time, self.perf_stats
         )
 
+        # 生成HTML报告
         if self.config["output"].get("generate_html_report", True):
             self.html_reporter.generate_report(
                 results, lib_df, ref_df, processing_time, self.perf_stats
             )
 
+        # 生成可视化图表
         if self.config["output"].get("generate_plots", True):
             processing_info = {
                 'processing_time_seconds': processing_time,
@@ -645,24 +789,39 @@ class CompleteNLRP3VirtualScreening:
     def run(self) -> pd.DataFrame:
         """运行完整的虚拟筛选流程"""
         try:
+            # 步骤1: 加载和预处理数据
             ref_df, lib_df = self.load_and_preprocess_data()
+
+            # 步骤2: 提取特征
             ref_features = self.extract_features(ref_df, "参考分子")
             lib_features = self.extract_features(lib_df, "库分子")
+
+            # 步骤3: 计算相似性
             similarities = self.compute_similarity(ref_features, lib_features)
+
+            # 步骤4: 聚合相似性
             scores = self.aggregate_similarities(similarities)
+
+            # 步骤5: 应用过滤器
             results = self.apply_filters(lib_df, scores, lib_features)
+
+            # 步骤6: 分子对接
             results = self.perform_docking(results, lib_df)
 
+            # 步骤7: 生成报告
             total_time = time.time() - self.start_time
             self.generate_reports(results, ref_df, lib_df, total_time)
+
+            # 打印摘要
             self._print_summary(results, total_time)
 
             return results
 
         except Exception as e:
-            self.logger.error(f"虚拟筛选失败: {e}")
+            # ===== 修复日志错误 =====
+            self.logger.error(f"虚拟筛选失败: {str(e)}")
             import traceback
-            traceback.print_exc()
+            self.logger.error(traceback.format_exc())
             raise
 
         finally:
@@ -700,6 +859,10 @@ class CompleteNLRP3VirtualScreening:
         if 'nlrp3_compliant' in results.columns:
             nlrp3_pass = sum(results['nlrp3_compliant'])
             print(f"✅ NLRP3规则通过: {nlrp3_pass}/{len(results)} ({nlrp3_pass / len(results) * 100:.1f}%)")
+
+        if 'admet_valid' in results.columns:
+            admet_pass = sum(results['admet_valid'])
+            print(f"💊 ADMET通过: {admet_pass}/{len(results)} ({admet_pass / len(results) * 100:.1f}%)")
 
         if 'is_safe' in results.columns:
             safe_count = sum(results['is_safe'])
